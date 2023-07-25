@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Volume Bar Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Crypto Volume Bar Chart</h1>
+    <form id="scrapeForm">
+        <label for="url">Enter URL of the website to scrape:</label>
+        <input type="text" id="url" name="url" required value="https://coinmarketcap.com/">
+        <label for="start_index">Choose Starting Index (Default: 0):</label>
+        <input type="number" id="start_index" name="start_index" min="0" placeholder="suggest 7">
+        <button type="submit">Scrape Data</button>
+    </form>
+    <div id="chartDiv">
+        <!-- Chart will be updated here -->
+    </div>
+    <!-- <button id="exportBtn">Export Data</button> -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        document.getElementById('scrapeForm').onsubmit = function (event) {
+            event.preventDefault();
+            var url = document.getElementById('url').value;
+            var start_index = document.getElementById('start_index').value;
+            socket.emit('scrape_request', {url: url, start_index: start_index});
+        };
+
+        socket.on('scrape_response', function (data) {
+            var chartDiv = document.getElementById('chartDiv');
+            chartDiv.innerHTML = '';
+
+            var symbols = [];
+            var volumes = [];
+            for (var i = 0; i < data.length; i++) {
+                symbols.push(data[i]['Symbol']);
+                volumes.push(data[i]['Volume']);
+            }
+
+            var ctx = document.createElement('canvas');
+            ctx.setAttribute('id', 'volumeChart');
+            chartDiv.appendChild(ctx);
+
+            var volumeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: symbols,
+                    datasets: [{
+                        label: 'Volume',
+                        data: volumes,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+        document.getElementById('exportBtn').onclick = function () {
+            socket.emit('export_request');
+        };
+    
+        socket.on('export_response', function (data) {
+            // Handle the export response
+            // Here, 'data' will be the data in the desired export format
+            // You can trigger a file download or display the data on the page, depending on your requirements
+            // For simplicity, we'll just log the data to the console
+            console.log(data);
+        });
+    </script>
+</body>
+</html>
