@@ -43,7 +43,7 @@ python app.py
 
 ## Screenshot
 
-![image](https://user-images.githubusercontent.com/69029099/211183900-2dbe7169-f8c9-494f-9e14-71825eb3ef30.png)
+![image](https://raw.githubusercontent.com/CharlieCidral/volume_coin/main/image.png)
 
 ### Dependecies
 
